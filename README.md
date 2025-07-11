@@ -466,13 +466,12 @@ body {
         </footer>
 
 
-  <!-- Firebase SDK 로드 -->
+  <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js"></script>
 
-<!-- Firebase 초기화 및 완판 기능 -->
 <script>
-  // ✅ Firebase 설정
+  // 1. Firebase 초기화
   const firebaseConfig = {
     apiKey: "AIzaSyDWeV7Rgtus6gfCesNGx5Mm0s2UFoK9VsU",
     authDomain: "handongeats.firebaseapp.com",
@@ -483,27 +482,20 @@ body {
     appId: "1:881457108225:web:ea9687fc1a0872f8853700",
     measurementId: "G-RRHR296G2R"
   };
-
-  // ✅ Firebase 초기화
-  firebase.initializeApp(firebaseConfig);
+  const app = firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 </script>
 
-<!-- ✅ 버튼 누를 때 상태 저장 -->
 <script>
+  // 2. 완판 처리 버튼 클릭 시 실행
   function toggleSoldOut(id) {
     const status = document.getElementById(id);
     const isNowSoldOut = status.style.display === "none";
-
-    // UI 토글
     status.style.display = isNowSoldOut ? "block" : "none";
-
-    // Firebase Realtime Database에 상태 저장
-    firebase.database().ref("items/" + id).set(isNowSoldOut);
+    db.ref("items/" + id).set(isNowSoldOut);
   }
-</script>
 
-<!-- ✅ 페이지 로드 시 상태 불러오기 -->
-<script>
+  // 3. 페이지 로드 시 Firebase에서 상태 불러오기
   window.onload = function () {
     const itemIds = [
       "orange-status", "egg-status", "fruit-status", "ramyeon-status",
@@ -515,9 +507,12 @@ body {
     ];
 
     itemIds.forEach((id) => {
-      firebase.database().ref("items/" + id).once("value").then((snapshot) => {
-        if (snapshot.exists() && snapshot.val() === true) {
+      db.ref("items/" + id).once("value").then((snapshot) => {
+        const isSoldOut = snapshot.val();
+        if (isSoldOut === true) {
           document.getElementById(id).style.display = "block";
+        } else {
+          document.getElementById(id).style.display = "none";
         }
       });
     });
