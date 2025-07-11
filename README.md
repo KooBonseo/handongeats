@@ -482,21 +482,20 @@ body {
     appId: "1:881457108225:web:ea9687fc1a0872f8853700",
     measurementId: "G-RRHR296G2R"
   };
+
   const app = firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
-</script>
 
-<script>
-  // 2. 완판 처리 버튼 클릭 시 실행
+  // 2. 버튼 클릭 시 처리
   function toggleSoldOut(id) {
-    const status = document.getElementById(id);
-    const isNowSoldOut = status.style.display === "none";
-    status.style.display = isNowSoldOut ? "block" : "none";
+    const el = document.getElementById(id);
+    const isNowSoldOut = el.style.display === "none";
+    el.style.display = isNowSoldOut ? "block" : "none";
     db.ref("items/" + id).set(isNowSoldOut);
   }
 
-  // 3. 페이지 로드 시 Firebase에서 상태 불러오기
-  window.onload = function () {
+  // 3. 페이지 로드시 Firebase에서 상태 불러오기
+  document.addEventListener("DOMContentLoaded", function () {
     const itemIds = [
       "orange-status", "egg-status", "fruit-status", "ramyeon-status",
       "banana-status", "jadoo-status", "watermelon-status", "buldak-status",
@@ -507,18 +506,19 @@ body {
     ];
 
     itemIds.forEach((id) => {
-      db.ref("items/" + id).once("value").then((snapshot) => {
+      const ref = db.ref("items/" + id);
+      ref.once("value").then((snapshot) => {
         const isSoldOut = snapshot.val();
-        if (isSoldOut === true) {
-          document.getElementById(id).style.display = "block";
-        } else {
-          document.getElementById(id).style.display = "none";
+        const el = document.getElementById(id);
+        if (el) {
+          el.style.display = isSoldOut ? "block" : "none";
         }
+      }).catch((error) => {
+        console.error("Firebase 불러오기 실패:", error);
       });
     });
-  };
+  });
 </script>
-
 
 </body>
 </html>
